@@ -3,7 +3,7 @@ import "package:flutter/material.dart";
 
 enum errorType { noConnection, exception, noData}
 
-String typeErrorToMessage(errorType err){
+String errorTypeToMessage(errorType err){
   switch (err) {
     case errorType.noConnection:
       return "Please check your internet connection and try again";
@@ -15,6 +15,8 @@ String typeErrorToMessage(errorType err){
       return "Application Internal Error"; //
   }
 }
+
+
 class ErrorScreen extends StatelessWidget {
   final errorType _message;
 
@@ -41,7 +43,7 @@ class ErrorScreen extends StatelessWidget {
                         child: Column(
                           children: <Widget>[
                             Text(
-                              typeErrorToMessage(_message),
+                              errorTypeToMessage(_message),
                               style: TextStyle(color: Theme
                                   .of(context)
                                   .hintColor),

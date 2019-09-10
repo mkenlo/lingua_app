@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
+
 import "../services/sentence_service.dart";
 import "../models/sentence_model.dart";
-import "package:lingua_app/screens/sentence_item.dart";
+import "sentence_item.dart";
+import 'error_screen.dart';
 
 class SentenceListScreen extends StatefulWidget {
   @override
@@ -12,32 +14,23 @@ class _SentenceListScreenState extends State<SentenceListScreen> {
 
   Future<List<Sentence>> sentences;
 
-  Widget _errorWidget(String message){
-    return Center(
-      child: Column(
-        children: <Widget>[
-          Icon(Icons.block, size: 64.0),
-          Text("$message", style: TextStyle(color: Colors.red[400]))
-        ],
-      )
-    );
-  }
-
   Widget _loadSentencesWidget() {
     return FutureBuilder(
-        future: fetchSentences(),
+        future: sentences,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.none) {
-            return _errorWidget("No connection to API");
+            return ErrorScreen(errorType.noConnection);
           }
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasError) {
-              return _errorWidget(snapshot.error.toString());
+              return ErrorScreen(errorType.exception);
             }
-            if (!snapshot.hasData) return Text("The API returned no DATA");
+            if (!snapshot.hasData) return ErrorScreen(errorType.noData);
             return _buildListWidget(snapshot.data);
           } else {
-            return CircularProgressIndicator();
+            return Center(
+              child: CircularProgressIndicator()
+            );
           }
         });
   }
@@ -62,10 +55,8 @@ class _SentenceListScreenState extends State<SentenceListScreen> {
     final appBar = AppBar(
         centerTitle: true,
         elevation: 0.0,
-        title: Text(
-          "Sentences",
-          style: TextStyle(fontSize: 30.0, color: Colors.black),
-        ));
+        title: Text("Sentences"),
+        );
 
     return Scaffold(
       appBar: appBar,

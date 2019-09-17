@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'screens/sentence_list_screen.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -22,15 +24,7 @@ class MyApp extends StatelessWidget {
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Lingua"),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."),
-      )
-    );
+    return SentenceListScreen();
   }
 }
 

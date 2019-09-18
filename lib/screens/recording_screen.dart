@@ -1,7 +1,13 @@
+import 'dart:math' show pi;
+import 'dart:io' show File, Directory;
+import 'dart:async' show StreamSubscription;
+
 import 'package:flutter/material.dart';
 import 'package:wave/wave.dart';
 import 'package:wave/config.dart';
-import 'dart:math';
+
+import 'package:intl/intl.dart' show DateFormat;
+import 'package:flutter_sound/flutter_sound.dart';
 
 import '../models/sentence_model.dart';
 
@@ -21,20 +27,68 @@ class _RecordingScreenState extends State<RecordingScreen> {
   String _recorderTimer;
   bool _isRecording;
   double _recorderIconSize = 60.0;
+  FlutterSound _flutterSound;
+  String _recordStorage = "/sdcard/Lingua";
+  StreamSubscription _recorderSubscription;
 
   void _startRecording() {
+    String fileId = widget.phrase.id;
+    new File("$_recordStorage/$fileId.m4a").create().then((filePath) {
 
+      _flutterSound.startRecorder(filePath.path).then((path) {
+
+        setState(() {
+          this._isRecording = true;
+        });
+
+        print('startRecorder, file is: $path');
+
+        _recorderSubscription =
+            _flutterSound.onRecorderStateChanged.listen((e) {
+          if (e == null) {
+            return;
+          }
+          DateTime date = new DateTime.fromMillisecondsSinceEpoch(
+              e.currentPosition.toInt());
+          String txt = DateFormat('mm:ss:SS', 'en_US').format(date);
+
+          setState(() {
+            this._recorderTimer = txt.substring(0, 8);
+          });
+        });
+      }).catchError((error) {
+        print(error);
+      });
+    }); //File
   }
 
   void _stopRecording() {
+    _flutterSound.stopRecorder().then((value) {
+      print('stopRecorder: $value');
+      if (_recorderSubscription != null) {
+        _recorderSubscription.cancel();
+        _recorderSubscription = null;
+      }
 
+      setState(() {
+        this._isRecording = false;
+      });
+    }).catchError((error) {
+      print("Was not able to stop recorder: $error");
+    });
+
+    // TODO: Upload the audioFile to server
   }
 
   void _cancelRecording() {
-
+    // TODO : add a Confirmation Dialog Box before deletion
+    String fileId = widget.phrase.id;
+    final recordedFile = File("$_recordStorage/$fileId.m4a");
+    //recordedFile.deleteSync();
   }
 
   void _navigateToListTranslation() {
+    // TODO : implement Navigation Route to Translation Screen
     print("Recording is Done, Navigating to next page");
   }
 
@@ -102,7 +156,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           IconButton(
               icon: Icon(Icons.cancel),
-              iconSize: _recorderIconSize/2,
+              iconSize: _recorderIconSize / 2,
               color: Theme.of(context).primaryColorDark,
               onPressed: () {
                 _cancelRecording();
@@ -110,7 +164,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
           _recorderWidget(),
           IconButton(
               icon: Icon(Icons.done_all),
-              iconSize: _recorderIconSize/2,
+              iconSize: _recorderIconSize / 2,
               color: Theme.of(context).primaryColorDark,
               onPressed: () {
                 _navigateToListTranslation();
@@ -148,21 +202,27 @@ class _RecordingScreenState extends State<RecordingScreen> {
     super.initState();
     _recorderTimer = "00:00:00";
     _isRecording = false;
+    _flutterSound = new FlutterSound();
+
+    // Create App Recording Folder
+    new Directory(_recordStorage).create().then((Directory directory) {
+      print(directory.path);
+    }).catchError((err) {
+      print(err);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
         child: Column(children: [
-          _languageWidget(widget.phrase.language.name, widget.targetLang),
-          Expanded(flex: 2, child: _sentenceWidget(widget.phrase.text)),
-          Expanded(child: _voiceWaveWidget()),
-          _timerWidget(),
-          _controlsWidget()]));
+      _languageWidget(widget.phrase.language.name, widget.targetLang),
+      Expanded(flex: 2, child: _sentenceWidget(widget.phrase.text)),
+      Expanded(child: _voiceWaveWidget()),
+      _timerWidget(),
+      _controlsWidget()
+    ]));
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+
 }

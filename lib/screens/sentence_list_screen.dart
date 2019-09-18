@@ -48,7 +48,7 @@ class _SentenceListScreenState extends State<SentenceListScreen> {
         itemCount: data.length,
         itemBuilder: (context, index) {
           Sentence item = data[index];
-          return SentenceItem(item, index+1);
+          return SentenceItem(phrase: item, index: index+1);
         });
   }
 

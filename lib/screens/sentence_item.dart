@@ -1,15 +1,16 @@
 import "package:flutter/material.dart";
 
 import "../models/sentence_model.dart";
+import "recording_screen.dart";
 
 class SentenceItem extends StatelessWidget {
-  final Sentence _phrase;
-  final int _index;
+  final Sentence phrase;
+  final int index;
 
-  SentenceItem(this._phrase, this._index);
+  SentenceItem({Key key, this.phrase, this.index});
 
   Color _tileBackgroundColor(BuildContext context) {
-    if (_index % 2 == 0) return Theme.of(context).primaryColorLight;
+    if (index % 2 == 0) return Theme.of(context).primaryColorLight;
     return Color.fromRGBO(1, 1, 1, 0.0);
   }
 
@@ -20,13 +21,14 @@ class SentenceItem extends StatelessWidget {
 
     Navigator.push(context,
         MaterialPageRoute<void>(builder: (BuildContext context) {
-      return Scaffold(
-          appBar: AppBar(
-              elevation: 1.0,
-              title: Text("Recording")),
-          body: Text("...loading Recording page..."),
-          resizeToAvoidBottomPadding: false);
-    }));
+          return Scaffold(
+              appBar: AppBar(
+                  elevation: 1.0,
+                  title: Text("Recorder")),
+              body: RecordingScreen(phrase:phrase),
+              resizeToAvoidBottomPadding: false);
+        }));
+
   }
 
   @override
@@ -34,8 +36,8 @@ class SentenceItem extends StatelessWidget {
     return Container(
         color: _tileBackgroundColor(context),
         child: ListTile(
-          title: Text(_phrase.text),
-          subtitle: Text(_phrase.language.code),
+          title: Text(phrase.text),
+          subtitle: Text(phrase.language.code),
           trailing: Icon(Icons.translate),
           onTap: () => _navigateToRecorder(context),
         ));

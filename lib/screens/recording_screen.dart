@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:wave/wave.dart';
+import 'package:wave/config.dart';
+import 'dart:math';
 
 import '../models/sentence_model.dart';
 
@@ -116,9 +119,24 @@ class _RecordingScreenState extends State<RecordingScreen> {
   }
 
   Widget _voiceWaveWidget() {
-    Widget wave = Text("wave voice here");
+    Widget wave = WaveWidget(
+      config: CustomConfig(
+        colors: [
+          Colors.teal[400],
+          Colors.teal[300],
+          Colors.teal[200],
+          Colors.teal[100],
+        ],
+        durations: [35000, 19440, 10800, 6000],
+        heightPercentages: [0.20, 0.23, 0.25, 0.30],
+        blur: MaskFilter.blur(BlurStyle.inner, 10.0),
+      ),
+      waveAmplitude: 0,
+      backgroundColor: Colors.transparent,
+      size: Size(double.infinity, 30.0),
+    );
 
-    return wave;
+    return Column(children: [wave, Transform.rotate(angle: pi, child: wave)]);
   }
 
   Widget _timerWidget() {

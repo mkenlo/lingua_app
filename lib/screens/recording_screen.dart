@@ -74,7 +74,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
     }).catchError((error) {
       print("Was not able to stop recorder: $error");
     });
-
     // TODO: Upload the audioFile to server
   }
 
@@ -204,7 +203,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
         padding: EdgeInsets.all(16.0),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           IconButton(
-              icon: Icon(Icons.cancel),
+              icon: Icon(Icons.delete),
               iconSize: _recorderIconSize / 2,
               color: Theme.of(context).primaryColorDark,
               onPressed: () {

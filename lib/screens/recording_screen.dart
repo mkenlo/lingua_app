@@ -34,9 +34,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
   void _startRecording() {
     String fileId = widget.phrase.id;
     new File("$_recordStorage/$fileId.m4a").create().then((filePath) {
-
       _flutterSound.startRecorder(filePath.path).then((path) {
-
         setState(() {
           this._isRecording = true;
         });
@@ -81,10 +79,61 @@ class _RecordingScreenState extends State<RecordingScreen> {
   }
 
   void _cancelRecording() {
-    // TODO : add a Confirmation Dialog Box before deletion
     String fileId = widget.phrase.id;
     final recordedFile = File("$_recordStorage/$fileId.m4a");
-    //recordedFile.deleteSync();
+
+    recordedFile.delete().then((result) {
+      setState(() {
+        _recorderTimer = "00:00:00";
+        _isRecording = false;
+      });
+
+      _showMessage("Deletion completed");
+
+    }).catchError((err) {
+      _showMessage("Error: File Not Found");
+    });
+  }
+
+  void _showMessage(String msg) {
+    final snackBar = SnackBar(
+      content: Text(msg),
+    );
+    Scaffold.of(context).showSnackBar(snackBar);
+  }
+
+  Future<void> _requestDeletionConfirmation() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete recording'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to delete this recording?')
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Delete'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _cancelRecording();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _navigateToListTranslation() {
@@ -159,7 +208,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
               iconSize: _recorderIconSize / 2,
               color: Theme.of(context).primaryColorDark,
               onPressed: () {
-                _cancelRecording();
+                _requestDeletionConfirmation();
               }),
           _recorderWidget(),
           IconButton(
@@ -223,6 +272,4 @@ class _RecordingScreenState extends State<RecordingScreen> {
       _controlsWidget()
     ]));
   }
-
-
 }

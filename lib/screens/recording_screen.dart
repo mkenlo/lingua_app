@@ -10,10 +10,11 @@ import 'package:intl/intl.dart' show DateFormat;
 import 'package:flutter_sound/flutter_sound.dart';
 
 import '../models/sentence_model.dart';
+import '../l10n/strings.dart';
+import '../config.dart';
 
 class RecordingScreen extends StatefulWidget {
   final Sentence phrase;
-  final String targetLang = "Yemba";
 
   RecordingScreen({Key key, @required this.phrase})
       : assert(phrase != null),
@@ -28,18 +29,15 @@ class _RecordingScreenState extends State<RecordingScreen> {
   bool _isRecording;
   double _recorderIconSize = 60.0;
   FlutterSound _flutterSound;
-  String _recordStorage = "/sdcard/Lingua";
   StreamSubscription _recorderSubscription;
 
   void _startRecording() {
     String fileId = widget.phrase.id;
-    new File("$_recordStorage/$fileId.m4a").create().then((filePath) {
+    new File("$recordStorage/$fileId.$fileExtension").create().then((filePath) {
       _flutterSound.startRecorder(filePath.path).then((path) {
         setState(() {
           this._isRecording = true;
         });
-
-        print('startRecorder, file is: $path');
 
         _recorderSubscription =
             _flutterSound.onRecorderStateChanged.listen((e) {
@@ -62,7 +60,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
 
   void _stopRecording() {
     _flutterSound.stopRecorder().then((value) {
-      print('stopRecorder: $value');
       if (_recorderSubscription != null) {
         _recorderSubscription.cancel();
         _recorderSubscription = null;
@@ -72,14 +69,19 @@ class _RecordingScreenState extends State<RecordingScreen> {
         this._isRecording = false;
       });
     }).catchError((error) {
-      print("Was not able to stop recorder: $error");
+      _showMessage(recorderCantStop);
     });
+  }
+
+  void _doneRecording() {
     // TODO: Upload the audioFile to server
+
+    _navigateToListTranslation();
   }
 
   void _cancelRecording() {
     String fileId = widget.phrase.id;
-    final recordedFile = File("$_recordStorage/$fileId.m4a");
+    final recordedFile = File("$recordStorage/$fileId.$fileExtension");
 
     recordedFile.delete().then((result) {
       setState(() {
@@ -87,10 +89,9 @@ class _RecordingScreenState extends State<RecordingScreen> {
         _isRecording = false;
       });
 
-      _showMessage("Deletion completed");
-
+      _showMessage(deletionSuccess);
     }).catchError((err) {
-      _showMessage("Error: File Not Found");
+      _showMessage(deletionError);
     });
   }
 
@@ -107,23 +108,21 @@ class _RecordingScreenState extends State<RecordingScreen> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete recording'),
+          title: Text(deletionAlert),
           content: SingleChildScrollView(
             child: ListBody(
-              children: <Widget>[
-                Text('Are you sure you want to delete this recording?')
-              ],
+              children: <Widget>[Text(deletionConfirmation)],
             ),
           ),
           actions: <Widget>[
             FlatButton(
-              child: Text('Cancel'),
+              child: Text(cancelBtn),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             FlatButton(
-              child: Text('Delete'),
+              child: Text(deleteBtn),
               onPressed: () {
                 Navigator.of(context).pop();
                 _cancelRecording();
@@ -137,12 +136,11 @@ class _RecordingScreenState extends State<RecordingScreen> {
 
   void _navigateToListTranslation() {
     // TODO : implement Navigation Route to Translation Screen
-    print("Recording is Done, Navigating to next page");
   }
 
   Widget _languageWidget(String source, String target) {
     return Container(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(padding),
         decoration: const BoxDecoration(
           border: Border(
             bottom: BorderSide(width: 1.0, color: Color(0xFFB2B7B6)),
@@ -160,7 +158,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
 
   Widget _sentenceWidget(String text) {
     return Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(padding),
         child: Text(
           text,
           style: TextStyle(
@@ -200,7 +198,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
 
   Widget _controlsWidget() {
     return Container(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(padding),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           IconButton(
               icon: Icon(Icons.delete),
@@ -215,22 +213,25 @@ class _RecordingScreenState extends State<RecordingScreen> {
               iconSize: _recorderIconSize / 2,
               color: Theme.of(context).primaryColorDark,
               onPressed: () {
-                _navigateToListTranslation();
+                _doneRecording();
               })
         ]));
   }
 
   Widget _voiceWaveWidget() {
+    final List<Color> waveColors = [
+      Colors.teal[400],
+      Colors.teal[300],
+      Colors.teal[200],
+      Colors.teal[100],
+    ];
+    final List<int> durations = [35000, 19440, 10800, 6000];
+    final List<double> waveHeight = [0.20, 0.23, 0.25, 0.30];
     Widget wave = WaveWidget(
       config: CustomConfig(
-        colors: [
-          Colors.teal[400],
-          Colors.teal[300],
-          Colors.teal[200],
-          Colors.teal[100],
-        ],
-        durations: [35000, 19440, 10800, 6000],
-        heightPercentages: [0.20, 0.23, 0.25, 0.30],
+        colors: waveColors,
+        durations: durations,
+        heightPercentages: waveHeight,
         blur: MaskFilter.blur(BlurStyle.inner, 10.0),
       ),
       waveAmplitude: 0,
@@ -253,18 +254,14 @@ class _RecordingScreenState extends State<RecordingScreen> {
     _flutterSound = new FlutterSound();
 
     // Create App Recording Folder
-    new Directory(_recordStorage).create().then((Directory directory) {
-      print(directory.path);
-    }).catchError((err) {
-      print(err);
-    });
+    new Directory(recordStorage).create();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
         child: Column(children: [
-      _languageWidget(widget.phrase.language.name, widget.targetLang),
+      _languageWidget(widget.phrase.language.name, defaultTargetLang),
       Expanded(flex: 2, child: _sentenceWidget(widget.phrase.text)),
       Expanded(child: _voiceWaveWidget()),
       _timerWidget(),

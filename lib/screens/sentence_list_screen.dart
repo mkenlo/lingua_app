@@ -13,6 +13,14 @@ class SentenceListScreen extends StatefulWidget {
 class _SentenceListScreenState extends State<SentenceListScreen> {
 
   Future<List<Sentence>> sentences;
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  new GlobalKey<RefreshIndicatorState>();
+
+  Future<void> _refreshList() async {
+    setState(() {
+      sentences = fetchSentences();
+    });
+  }
 
   Widget _loadSentencesWidget() {
     return FutureBuilder(
@@ -40,7 +48,7 @@ class _SentenceListScreenState extends State<SentenceListScreen> {
         itemCount: data.length,
         itemBuilder: (context, index) {
           Sentence item = data[index];
-          return SentenceItem(item, index+1);
+          return SentenceItem(phrase: item, index: index+1);
         });
   }
 
@@ -60,7 +68,10 @@ class _SentenceListScreenState extends State<SentenceListScreen> {
 
     return Scaffold(
       appBar: appBar,
-      body: _loadSentencesWidget(),
+      body: RefreshIndicator(
+          child: _loadSentencesWidget(),
+          key: _refreshIndicatorKey,
+          onRefresh: ()=>_refreshList()),
     );
   }
 }

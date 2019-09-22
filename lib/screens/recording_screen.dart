@@ -12,6 +12,8 @@ import 'package:flutter_sound/flutter_sound.dart';
 import '../models/sentence_model.dart';
 import '../l10n/strings.dart';
 import '../config.dart';
+import '../services/translation_service.dart';
+import '../models/translation_model.dart';
 
 class RecordingScreen extends StatefulWidget {
   final Sentence phrase;
@@ -74,7 +76,18 @@ class _RecordingScreenState extends State<RecordingScreen> {
   }
 
   void _doneRecording() {
-    // TODO: Upload the audioFile to server
+    final recordedFile = "${widget.phrase.id}.$fileExtension";
+
+    Translation translation = Translation(
+        // TODO Change Dummy values with values picked from settings
+        // TODO Implement User Model and Logic
+        // TODO Implement Settings / Preferences Screen
+        author: dummyUserName,
+        targetLanguage: defaultTargetLang,
+        sentenceId: widget.phrase.id,
+        audioFileName: recordedFile);
+
+    readFileContentAndUploadTranslation(translation);
 
     _navigateToListTranslation();
   }

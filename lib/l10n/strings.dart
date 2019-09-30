@@ -26,3 +26,13 @@ const String noConnection = "Please check your internet connection and try again
 
 const String noData = "No data available";
 
+const String welcomeMessage = "Welcome to Lingua";
+
+const String termsAndConditionsPart1 = "By tapping Continue, I accept the";
+
+const String termsAndConditionsPart2 = "TERMS OF THIS SERVICE";
+
+const String loginCancelled = 'Login cancelled by the user.';
+
+const String loginError = 'Something went wrong with the login process.\n'
+    'Here\'s the error Facebook gave us:';

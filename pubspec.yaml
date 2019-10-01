@@ -24,6 +24,7 @@ dependencies:
   intl: ^0.16.0
   wave: ^0.0.8
   flutter_facebook_login: ^3.0.0
+  shared_preferences: ^0.5.3+4
 
 dev_dependencies:
   flutter_test:

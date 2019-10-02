@@ -8,6 +8,7 @@ import 'package:wave/config.dart';
 
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/sentence_model.dart';
 import '../l10n/strings.dart';
@@ -32,6 +33,13 @@ class _RecordingScreenState extends State<RecordingScreen> {
   double _recorderIconSize = 60.0;
   FlutterSound _flutterSound;
   StreamSubscription _recorderSubscription;
+  String _author = dummyUserName;
+
+  Future<String> _getUserNameFromPreferences() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String username = prefs.getString("username");
+    return username;
+  }
 
   void _startRecording() {
     String fileId = widget.phrase.id;
@@ -80,9 +88,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
 
     Translation translation = Translation(
         // TODO Change Dummy values with values picked from settings
-        // TODO Implement User Model and Logic
         // TODO Implement Settings / Preferences Screen
-        author: dummyUserName,
+        author: _author,
         targetLanguage: defaultTargetLang,
         sentenceId: widget.phrase.id,
         audioFileName: recordedFile);
@@ -268,6 +275,11 @@ class _RecordingScreenState extends State<RecordingScreen> {
 
     // Create App Recording Folder
     new Directory(recordStorage).create();
+
+    _getUserNameFromPreferences().then((name){
+      this._author = name;
+    });
+
   }
 
   @override

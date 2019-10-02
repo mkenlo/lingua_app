@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'sentence_list_screen.dart';
 import '../services/fb_login.dart';
 import '../l10n/strings.dart';
-
+import '../models/user_model.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -17,11 +18,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final FacebookLogin facebookSignIn = new FacebookLogin();
 
   void _doLogin() async {
-    final FacebookLoginResult result = await facebookSignIn.logIn(['email']);
+    final FacebookLoginResult result =
+        await facebookSignIn.logIn(['email', 'user_location']);
 
     switch (result.status) {
       case FacebookLoginStatus.loggedIn:
-        _setUserPreferences(result.accessToken.token);
+        _saveProfilePreferences(result.accessToken.token);
         _navigateToHomePage();
         break;
       case FacebookLoginStatus.cancelledByUser:
@@ -36,24 +38,31 @@ class _LoginScreenState extends State<LoginScreen> {
 
         break;
     }
-
   }
 
+  void _saveProfilePreferences(String accessToken) async {
 
-  void _setUserPreferences(String accessToken) async{
-    //TODO : load and set user Profile
-    dynamic userProfile = await loadUserProfile(accessToken);
+    User userProfile = await loadUserProfile(accessToken);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', userProfile.username);
+    await prefs.setString('firstName', userProfile.firstName);
+    await prefs.setString('lastName', userProfile.lastName);
+    await prefs.setString('location', userProfile.location);
+    await prefs.setString('avatar', userProfile.avatar);
+
+    saveUserProfile(userProfile);
   }
 
-  void _navigateToHomePage(){
+  void _navigateToHomePage() {
     if (Navigator.canPop(context)) {
       Navigator.pop(context);
     }
 
-    Navigator.push(context,
-        CupertinoPageRoute<void>(builder: (BuildContext context) => SentenceListScreen()));
+    Navigator.push(
+        context,
+        CupertinoPageRoute<void>(
+            builder: (BuildContext context) => SentenceListScreen()));
   }
-
 
   Widget facebookLogInButton() {
     return Container(
@@ -86,10 +95,8 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     final titleTile = Container(
         margin: EdgeInsets.fromLTRB(0.0, 200.0, 0.0, 32),
         child: Text(welcomeMessage,
@@ -100,8 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final termsAndConditions =
         Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-      Text(termsAndConditionsPart1,
-          style: TextStyle(color: Colors.white)),
+      Text(termsAndConditionsPart1, style: TextStyle(color: Colors.white)),
       Text(termsAndConditionsPart2,
           style: TextStyle(
               fontWeight: FontWeight.w500,
@@ -118,7 +124,9 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 titleTile,
-                Expanded(child: Text(message, style: TextStyle(color: Colors.amber))),
+                Expanded(
+                    child:
+                        Text(message, style: TextStyle(color: Colors.amber))),
                 facebookLogInButton(),
                 termsAndConditions
               ],

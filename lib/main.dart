@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: "Raleway",
         primarySwatch: Colors.teal,
-        brightness: Brightness.light,
+        //brightness: Brightness.light,
       ),
       home: HomePage(),
     );

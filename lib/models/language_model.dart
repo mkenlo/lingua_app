@@ -14,4 +14,8 @@ class Language {
   factory Language.fromJson(Map<String, dynamic> json) {
     return Language(json['name'], json['type'], json['code']);
   }
+
+  static List<Language> asListFromJson(List<dynamic> json) {
+    return json.map((i) => Language.fromJson(i)).toList();
+  }
 }

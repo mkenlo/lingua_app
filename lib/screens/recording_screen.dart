@@ -11,10 +11,11 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/sentence_model.dart';
+import '../models/translation_model.dart';
 import '../l10n/strings.dart';
 import '../config.dart';
 import '../services/translation_service.dart';
-import '../models/translation_model.dart';
+import '../services/language_service.dart';
 
 class RecordingScreen extends StatefulWidget {
   final Sentence phrase;
@@ -34,8 +35,9 @@ class _RecordingScreenState extends State<RecordingScreen> {
   FlutterSound _flutterSound;
   StreamSubscription _recorderSubscription;
   String _author = dummyUserName;
+  String _selectedTargetLang;
 
-  Future<String> _getUserNameFromPreferences() async{
+  Future<String> _getUserNameFromPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String username = prefs.getString("username");
     return username;
@@ -158,7 +160,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
     // TODO : implement Navigation Route to Translation Screen
   }
 
-  Widget _languageWidget(String source, String target) {
+  Widget _languageWidget(String source) {
     return Container(
         padding: EdgeInsets.all(padding),
         decoration: const BoxDecoration(
@@ -169,11 +171,40 @@ class _RecordingScreenState extends State<RecordingScreen> {
         child: Row(children: [
           Text(
             source,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
           ),
           Expanded(child: Icon(Icons.compare_arrows)),
-          Text(target, style: TextStyle(fontWeight: FontWeight.bold))
+          DropdownButtonHideUnderline(child: _dropDownButton())
         ]));
+  }
+
+  Widget _dropDownButton() {
+    return FutureBuilder(
+        future: fetchLanguages("type=local"),
+        builder: (context, snapshot) {
+          if (snapshot.hasError || !snapshot.hasData)
+            return Text(defaultTargetLang);
+          else {
+            List<DropdownMenuItem> languageItems = new List();
+            snapshot.data.forEach((lang) {
+              languageItems.add(DropdownMenuItem<String>(
+                value: lang.name,
+                child: Text(lang.name),
+              ));
+            });
+            return DropdownButton(
+              items: languageItems,
+              value: _selectedTargetLang,
+              hint: Text("Translate to",
+                  style: TextStyle(color: Theme.of(context).primaryColor)),
+              onChanged: (value) {
+                setState(() {
+                  _selectedTargetLang = value;
+                });
+              },
+            );
+          }
+        });
   }
 
   Widget _sentenceWidget(String text) {
@@ -276,17 +307,16 @@ class _RecordingScreenState extends State<RecordingScreen> {
     // Create App Recording Folder
     new Directory(recordStorage).create();
 
-    _getUserNameFromPreferences().then((name){
+    _getUserNameFromPreferences().then((name) {
       this._author = name;
     });
-
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
         child: Column(children: [
-      _languageWidget(widget.phrase.language.name, defaultTargetLang),
+      _languageWidget(widget.phrase.language.name),
       Expanded(flex: 2, child: _sentenceWidget(widget.phrase.text)),
       Expanded(child: _voiceWaveWidget()),
       _timerWidget(),

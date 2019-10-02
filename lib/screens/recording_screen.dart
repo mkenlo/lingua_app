@@ -44,30 +44,36 @@ class _RecordingScreenState extends State<RecordingScreen> {
   }
 
   void _startRecording() {
-    String fileId = widget.phrase.id;
-    new File("$recordStorage/$fileId.$fileExtension").create().then((filePath) {
-      _flutterSound.startRecorder(filePath.path).then((path) {
-        setState(() {
-          this._isRecording = true;
-        });
-
-        _recorderSubscription =
-            _flutterSound.onRecorderStateChanged.listen((e) {
-          if (e == null) {
-            return;
-          }
-          DateTime date = new DateTime.fromMillisecondsSinceEpoch(
-              e.currentPosition.toInt());
-          String txt = DateFormat('mm:ss:SS', 'en_US').format(date);
-
+    if (_selectedTargetLang == null) {
+      _askForTargetLanguage();
+    } else {
+      String fileId = widget.phrase.id;
+      new File("$recordStorage/$fileId.$fileExtension")
+          .create()
+          .then((filePath) {
+        _flutterSound.startRecorder(filePath.path).then((path) {
           setState(() {
-            this._recorderTimer = txt.substring(0, 8);
+            this._isRecording = true;
           });
+
+          _recorderSubscription =
+              _flutterSound.onRecorderStateChanged.listen((e) {
+            if (e == null) {
+              return;
+            }
+            DateTime date = new DateTime.fromMillisecondsSinceEpoch(
+                e.currentPosition.toInt());
+            String txt = DateFormat('mm:ss:SS', 'en_US').format(date);
+
+            setState(() {
+              this._recorderTimer = txt.substring(0, 8);
+            });
+          });
+        }).catchError((error) {
+          print(error);
         });
-      }).catchError((error) {
-        print(error);
-      });
-    }); //File
+      }); //File
+    }
   }
 
   void _stopRecording() {
@@ -92,7 +98,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
         // TODO Change Dummy values with values picked from settings
         // TODO Implement Settings / Preferences Screen
         author: _author,
-        targetLanguage: defaultTargetLang,
+        targetLanguage: _selectedTargetLang,
         sentenceId: widget.phrase.id,
         audioFileName: recordedFile);
 
@@ -154,6 +160,30 @@ class _RecordingScreenState extends State<RecordingScreen> {
         );
       },
     );
+  }
+
+  void _askForTargetLanguage() {
+    showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              titleTextStyle: TextStyle(
+                  color: Theme.of(context).primaryColorDark,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0),
+              title: Text(askLanguageAlert),
+              content: Text(askLanguageAlertContent),
+
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('Ok'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ]);
+        });
   }
 
   void _navigateToListTranslation() {

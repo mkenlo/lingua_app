@@ -13,8 +13,7 @@ class MyApp extends StatelessWidget {
       title: 'Lingua',
       theme: ThemeData(
         fontFamily: "Raleway",
-        primarySwatch: Colors.teal,
-        //brightness: Brightness.light,
+        primarySwatch: Colors.teal
       ),
       home: HomePage(),
     );

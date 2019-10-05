@@ -16,7 +16,7 @@ Future<User> loadUserProfile(dynamic accessToken) async {
   return User.fromJson(jsonProfile);
 }
 
-Future saveUserProfile(User user) async {
+Future<int> saveUserProfile(User user) async {
   final response = await http.post(url, body: json.encode(user));
 
   if (response.statusCode != 200) {

@@ -36,3 +36,7 @@ const String loginCancelled = 'Login cancelled by the user.';
 
 const String loginError = 'Something went wrong with the login process.\n'
     'Here\'s the error Facebook gave us:';
+
+const String askLanguageAlert = "Unknown target language";
+
+const String askLanguageAlertContent= "Please select a target language";

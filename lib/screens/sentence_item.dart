@@ -15,20 +15,10 @@ class SentenceItem extends StatelessWidget {
   }
 
   void _navigateToRecorder(BuildContext context) {
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context);
-    }
-
     Navigator.push(context,
         MaterialPageRoute<void>(builder: (BuildContext context) {
-          return Scaffold(
-              appBar: AppBar(
-                  elevation: 1.0,
-                  title: Text("Recorder")),
-              body: RecordingScreen(phrase:phrase),
-              resizeToAvoidBottomPadding: false);
-        }));
-
+      return RecordingScreen(phrase: phrase);
+    }));
   }
 
   @override

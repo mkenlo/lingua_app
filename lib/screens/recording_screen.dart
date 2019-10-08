@@ -2,6 +2,7 @@ import 'dart:math' show pi;
 import 'dart:io' show File, Directory;
 import 'dart:async' show StreamSubscription;
 
+import 'package:Lingua/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:wave/wave.dart';
 import 'package:wave/config.dart';
@@ -174,7 +175,6 @@ class _RecordingScreenState extends State<RecordingScreen> {
                   fontSize: 20.0),
               title: Text(askLanguageAlert),
               content: Text(askLanguageAlertContent),
-
               actions: <Widget>[
                 FlatButton(
                   child: Text('Ok'),
@@ -342,9 +342,25 @@ class _RecordingScreenState extends State<RecordingScreen> {
     });
   }
 
+  void _navigateToProfile() {
+    Navigator.push(context,
+        MaterialPageRoute<void>(builder: (BuildContext context) {
+      return ProfileScreen();
+    }));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final appBar = AppBar(elevation: 1.0, title: Text("Translate"), actions: [
+      FlatButton.icon(
+          onPressed: () {
+            _navigateToProfile();
+          },
+          icon: Icon(Icons.person, color: Colors.white),
+          label: Text(""))
+    ]);
+
+    final content = Container(
         child: Column(children: [
       _languageWidget(widget.phrase.language.name),
       Expanded(flex: 2, child: _sentenceWidget(widget.phrase.text)),
@@ -352,5 +368,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
       _timerWidget(),
       _controlsWidget()
     ]));
+
+    return Scaffold(
+        appBar: appBar, body: content, resizeToAvoidBottomPadding: false);
   }
 }

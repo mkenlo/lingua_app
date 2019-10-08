@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:Lingua/screens/preferences_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
@@ -15,6 +17,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   String message = "";
+  bool _isLanguageSaved;
+
   final FacebookLogin facebookSignIn = new FacebookLogin();
 
   void _doLogin() async {
@@ -24,7 +28,8 @@ class _LoginScreenState extends State<LoginScreen> {
     switch (result.status) {
       case FacebookLoginStatus.loggedIn:
         _saveProfilePreferences(result.accessToken.token);
-        _navigateToHomePage();
+        _navigateToNextPage();
+
         break;
       case FacebookLoginStatus.cancelledByUser:
         setState(() {
@@ -41,7 +46,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _saveProfilePreferences(String accessToken) async {
-
     User userProfile = await loadUserProfile(accessToken);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('username', userProfile.username);
@@ -53,15 +57,27 @@ class _LoginScreenState extends State<LoginScreen> {
     saveUserProfile(userProfile);
   }
 
-  void _navigateToHomePage() {
+  Future<bool> _isPreferredLanguagesSet() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return (prefs.getString("sourceLanguage") != null) ||
+        (prefs.getString("targetLanguage") != null);
+  }
+
+  void _navigateToNextPage() async {
+    _isLanguageSaved = await _isPreferredLanguagesSet();
+
+    var nextPage;
+
+    if (!_isLanguageSaved)
+      nextPage = (BuildContext context) => PreferenceScreen();
+    else
+      nextPage = (BuildContext context) => SentenceListScreen();
+
     if (Navigator.canPop(context)) {
       Navigator.pop(context);
     }
 
-    Navigator.push(
-        context,
-        CupertinoPageRoute<void>(
-            builder: (BuildContext context) => SentenceListScreen()));
+    Navigator.push(context, CupertinoPageRoute<void>(builder: nextPage));
   }
 
   Widget facebookLogInButton() {
@@ -93,6 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    _isLanguageSaved = false;
   }
 
   @override

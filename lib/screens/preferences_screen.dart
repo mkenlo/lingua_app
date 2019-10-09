@@ -16,11 +16,6 @@ class PreferenceScreenState extends State<PreferenceScreen> {
   String _preferredSourceLang;
   String _preferredTargetLang;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   Widget _loadDropDownItems(List<Language> data, String languageType) {
     String hint =
         (languageType == "source") ? "Source Language" : "Target Language";
@@ -63,6 +58,7 @@ class PreferenceScreenState extends State<PreferenceScreen> {
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
+              if (!snapshot.hasData) return ErrorScreen(errorType.noData);
               return ErrorScreen(errorType.noConnection);
             case ConnectionState.active:
             case ConnectionState.waiting:

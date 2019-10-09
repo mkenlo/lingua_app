@@ -37,6 +37,16 @@ class _RecordingScreenState extends State<RecordingScreen> {
   StreamSubscription _recorderSubscription;
   String _author = dummyUserName;
   String _selectedTargetLang;
+  String _sourceLanguage;
+
+
+  Future<List<String>> _getLanguagesFromPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return [
+      prefs.getString("sourceLanguage"),
+      prefs.getString("targetLanguage")
+    ];
+  }
 
   Future<String> _getUserNameFromPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -200,7 +210,7 @@ class _RecordingScreenState extends State<RecordingScreen> {
         ),
         child: Row(children: [
           Text(
-            source,
+            _sourceLanguage,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
           ),
           Expanded(child: Icon(Icons.compare_arrows)),
@@ -338,7 +348,18 @@ class _RecordingScreenState extends State<RecordingScreen> {
     new Directory(recordStorage).create();
 
     _getUserNameFromPreferences().then((name) {
-      this._author = name;
+      setState(() {
+        this._author = name;
+      });
+    });
+
+    _getLanguagesFromPreferences().then((languages){
+
+      setState(() {
+        this._sourceLanguage = languages[0];
+        this._selectedTargetLang = languages[1]; //set as default target language
+      });
+
     });
   }
 

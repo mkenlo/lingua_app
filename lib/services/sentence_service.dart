@@ -8,8 +8,7 @@ import 'settings.dart';
 
 const url = '$apiAuthorityUrl/sentences';
 
-Future<List<Sentence>> fetchSentences() async {
-  String filter = "language=francais";
+Future<List<Sentence>> fetchSentences(String filter) async {
   final response = await http.get('$url?$filter');
 
   if (response.statusCode == 200) {

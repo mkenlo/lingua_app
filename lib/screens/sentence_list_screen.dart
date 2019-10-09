@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 
+import 'package:shared_preferences/shared_preferences.dart';
 import "../services/sentence_service.dart";
 import "../models/sentence_model.dart";
 import "sentence_item.dart";
@@ -16,17 +17,29 @@ class _SentenceListScreenState extends State<SentenceListScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
   new GlobalKey<RefreshIndicatorState>();
 
+  Future<String> _getLanguagesFromPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString("sourceLanguage");
+
+  }
+
   Future<void> _refreshList() async {
-    setState(() {
-      sentences = fetchSentences();
+
+    _getLanguagesFromPreferences().then((sourceLanguage){
+      setState(() {
+        sentences = fetchSentences("language=$sourceLanguage");
+      });
     });
+
   }
 
   Widget _loadSentencesWidget() {
     return FutureBuilder(
         future: sentences,
         builder: (context, snapshot) {
+
           if (snapshot.connectionState == ConnectionState.none) {
+            if (!snapshot.hasData) return ErrorScreen(errorType.noData);
             return ErrorScreen(errorType.noConnection);
           }
           if (snapshot.connectionState == ConnectionState.done) {
@@ -55,7 +68,11 @@ class _SentenceListScreenState extends State<SentenceListScreen> {
   @override
   void initState() {
     super.initState();
-    sentences = fetchSentences();
+
+    _getLanguagesFromPreferences().then((sourceLanguage){
+      sentences = fetchSentences("language=$sourceLanguage");
+    });
+
   }
 
   @override

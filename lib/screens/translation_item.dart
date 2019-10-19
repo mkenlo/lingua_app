@@ -1,1 +1,0 @@
-// view for item translation

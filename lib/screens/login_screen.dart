@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'sentence_list_screen.dart';
+import 'translation_screen.dart';
 import '../services/fb_login.dart';
 import '../l10n/strings.dart';
 import '../models/user_model.dart';
@@ -48,13 +48,16 @@ class _LoginScreenState extends State<LoginScreen> {
   void _saveProfilePreferences(String accessToken) async {
     User userProfile = await loadUserProfile(accessToken);
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('username', userProfile.username);
-    await prefs.setString('firstName', userProfile.firstName);
-    await prefs.setString('lastName', userProfile.lastName);
-    await prefs.setString('location', userProfile.location);
-    await prefs.setString('avatar', userProfile.avatar);
 
-    saveUserProfile(userProfile);
+    if(!prefs.containsKey('username')){
+      await prefs.setString('username', userProfile.username);
+      await prefs.setString('firstName', userProfile.firstName);
+      await prefs.setString('lastName', userProfile.lastName);
+      await prefs.setString('location', userProfile.location);
+      await prefs.setString('avatar', userProfile.avatar);
+
+      saveUserProfile(userProfile);
+    }
   }
 
   Future<bool> _isPreferredLanguagesSet() async {
@@ -71,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_isLanguageSaved)
       nextPage = (BuildContext context) => PreferenceScreen();
     else
-      nextPage = (BuildContext context) => SentenceListScreen();
+      nextPage = (BuildContext context) => TranslationScreen();
 
     if (Navigator.canPop(context)) {
       Navigator.pop(context);

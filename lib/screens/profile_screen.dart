@@ -18,12 +18,14 @@ class ProfileScreen extends StatefulWidget {
 
 class ProfileScreenState extends State<ProfileScreen> {
   String preferredSourceLanguage = "";
+  String preferredTargetLanguage = "";
 
   @override
   void initState() {
-    _getPreferredSourceLanguage().then((value) {
+    _getPreferredLanguage().then((values) {
       setState(() {
-        preferredSourceLanguage = value ?? defaultSourceLang;
+        preferredSourceLanguage = values[0] ?? defaultSourceLang;
+        preferredTargetLanguage = values[1] ?? "";
       });
     });
     super.initState();
@@ -40,17 +42,27 @@ class ProfileScreenState extends State<ProfileScreen> {
         avatar: prefs.getString("avatar"));
   }
 
-  Future<String> _getPreferredSourceLanguage() async {
+  Future<List> _getPreferredLanguage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("preferredSourceLanguage");
+    return [prefs.getString("sourceLanguage"),
+    prefs.getString("targetLanguage")];
   }
 
   void _setPreferredSourceLang(String preferredLang) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("preferredSourceLanguage", preferredLang);
+    prefs.setString("sourceLanguage", preferredLang);
 
     setState(() {
       preferredSourceLanguage = preferredLang;
+    });
+  }
+
+  void _setPreferredTargetLang(String preferredLang) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("targetLanguage", preferredLang);
+
+    setState(() {
+      preferredTargetLanguage = preferredLang;
     });
   }
 
@@ -105,6 +117,46 @@ class ProfileScreenState extends State<ProfileScreen> {
         });
   }
 
+  void _changeTargetLanguage() {
+    Widget languages = FutureBuilder(
+      future: fetchLanguages("type=local"),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.none) {
+          return ErrorScreen(errorType.noConnection);
+        }
+        if (snapshot.hasError) {
+          return ErrorScreen(errorType.exception);
+        }
+        if (snapshot.hasData) {
+          return ListView.builder(
+              itemCount: snapshot.data.length,
+              itemBuilder: (context, index) {
+                return InkWell(
+                    onTap: () {
+                      _setPreferredTargetLang(snapshot.data[index].name);
+                      Navigator.pop(context);
+                    },
+                    highlightColor: Theme.of(context).primaryColorLight,
+                    child: ListTile(
+                      title: Text(snapshot.data[index].name),
+                      subtitle: Text(snapshot.data[index].code),
+                    ));
+              });
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+
+    showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              title: Text("Change Language"), content: languages);
+        });
+  }
+
   _buildPreferencesContent(User profile) {
     final Widget profilePic = ClipRRect(
         borderRadius: BorderRadius.circular(50.0),
@@ -133,6 +185,15 @@ class ProfileScreenState extends State<ProfileScreen> {
       },
     );
 
+    final targetLang = ListTile(
+      leading: Icon(Icons.translate, color: Theme.of(context).primaryColorDark),
+      title: Text("Target Language"),
+      subtitle: Text(preferredTargetLanguage),
+      onTap: () {
+        _changeTargetLanguage();
+      },
+    );
+
     final loginStatus = ListTile(
       leading:
           Icon(Icons.exit_to_app, color: Theme.of(context).primaryColorDark),
@@ -145,7 +206,7 @@ class ProfileScreenState extends State<ProfileScreen> {
 
     return Container(
         child: ListView(
-            children: [profilePic, name, location, sourceLang, loginStatus]));
+            children: [profilePic, name, location, sourceLang, targetLang, loginStatus]));
   }
 
   @override
@@ -166,9 +227,7 @@ class ProfileScreenState extends State<ProfileScreen> {
         return null; // unreachable
       },
     );
-    return Scaffold(
-        appBar: AppBar(elevation: 1.0, title: Text("Profile")),
-        body: content,
-        resizeToAvoidBottomPadding: false);
+
+    return content;
   }
 }

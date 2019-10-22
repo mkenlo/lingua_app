@@ -154,6 +154,7 @@ class TranslationScreenState extends State<TranslationScreen> {
         ),
         leftBarIndicatorColor: Theme.of(context).primaryColorDark)
       ..show(context);
+
   }
 
   void _askToSaveRecording() {
@@ -355,6 +356,7 @@ class TranslationScreenState extends State<TranslationScreen> {
           _controlsWidget()
         ]));
 
-    return Scaffold(appBar: appBar, body: content);
+    //return Scaffold(body: content);
+    return content;
   }
 }

@@ -6,6 +6,7 @@ import '../services/language_service.dart';
 import '../models/language_model.dart';
 import 'error_screen.dart';
 import 'sentence_list_screen.dart';
+import 'home_screen.dart';
 
 class PreferenceScreen extends StatefulWidget {
   @override
@@ -80,7 +81,7 @@ class PreferenceScreenState extends State<PreferenceScreen> {
     Navigator.push(
         context,
         CupertinoPageRoute<void>(
-            builder: (BuildContext context) => SentenceListScreen()));
+            builder: (BuildContext context) => HomeScreen()));
   }
 
   Future<bool> _setLanguagesPreferences() async {

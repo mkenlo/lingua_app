@@ -48,6 +48,7 @@ class TranslationScreenState extends State<TranslationScreen> {
   final AsyncMemoizer _caching = AsyncMemoizer();
 
   _fetchAndCacheData() {
+    // TODO  Deal with the issue that it will make it impossible to load more data from the server if pagination
     return _caching.runOnce(() async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       return fetchSentences("language=${prefs.getString("sourceLanguage")}");
@@ -116,7 +117,7 @@ class TranslationScreenState extends State<TranslationScreen> {
     Translation translation = Translation(
         author: _author,
         targetLanguage: _targetLang,
-        sentenceId: _currentSentence.id,
+        sentence: _currentSentence.id,
         audioFileName: recordedFile);
 
     readFileContentAndUploadTranslation(translation);
@@ -154,7 +155,6 @@ class TranslationScreenState extends State<TranslationScreen> {
         ),
         leftBarIndicatorColor: Theme.of(context).primaryColorDark)
       ..show(context);
-
   }
 
   void _askToSaveRecording() {
@@ -301,11 +301,11 @@ class TranslationScreenState extends State<TranslationScreen> {
     return FutureBuilder(
         future: _fetchAndCacheData(),
         builder: (context, snapshot) {
+          // TODO : Deal with every type of error. eg Connection Error
           if (!snapshot.hasError && snapshot.hasData) {
             _sentences = snapshot.data;
             return _buildSentencePageWidget(_sentences);
-          } 
-          else {
+          } else {
             return Center(child: CircularProgressIndicator());
           }
         });
@@ -332,21 +332,14 @@ class TranslationScreenState extends State<TranslationScreen> {
         setState(() {
           this._author = prefs[0];
           this._sourceLanguage = prefs[1];
-          this._targetLang = prefs[2]; 
+          this._targetLang = prefs[2];
         });
       });
     });
-
-
   }
 
   @override
   Widget build(BuildContext context) {
-    final appBar = AppBar(
-      elevation: 2.0,
-      title: Text("Translate"),
-    );
-
     final content = Container(
         color: Color(0xFFF3F8F7),
         child: Column(children: [
@@ -356,7 +349,6 @@ class TranslationScreenState extends State<TranslationScreen> {
           _controlsWidget()
         ]));
 
-    //return Scaffold(body: content);
     return content;
   }
 }

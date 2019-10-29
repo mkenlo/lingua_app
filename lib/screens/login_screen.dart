@@ -50,14 +50,15 @@ class _LoginScreenState extends State<LoginScreen> {
     User userProfile = await loadUserProfile(accessToken);
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    if(!prefs.containsKey('username')){
+    if(!prefs.containsKey('username')){ // first install
       await prefs.setString('username', userProfile.username);
       await prefs.setString('firstName', userProfile.firstName);
       await prefs.setString('lastName', userProfile.lastName);
       await prefs.setString('location', userProfile.location);
       await prefs.setString('avatar', userProfile.avatar);
 
-      saveUserProfile(userProfile);
+      String userId = await saveUserProfile(userProfile);
+      await prefs.setString('userid', userId);
     }
   }
 

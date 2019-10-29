@@ -167,7 +167,7 @@ class ProfileScreenState extends State<ProfileScreen> {
         ));
 
     final Widget name = ListTile(
-        title: Text("${profile.firstName} ${profile.lastName}",
+        title: Text("${profile.fullName()} ",
             style: Theme.of(context).textTheme.headline),
         subtitle: Text(profile.username));
 

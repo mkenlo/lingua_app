@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  List<String> _pagesTitle = ["Translate", "TODO", "Profile"];
+  List<String> _pagesTitle = ["Translate", "My Translations", "Profile"];
 
   void _onItemTapped(int index) {
     setState(() {

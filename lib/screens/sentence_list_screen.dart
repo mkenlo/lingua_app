@@ -1,10 +1,12 @@
+import 'dart:async';
 import "package:flutter/material.dart";
 
 import 'package:shared_preferences/shared_preferences.dart';
 import "../services/sentence_service.dart";
 import "../models/sentence_model.dart";
-import "sentence_item.dart";
 import 'error_screen.dart';
+import 'translation_screen.dart';
+
 
 class SentenceListScreen extends StatefulWidget {
   @override
@@ -38,21 +40,19 @@ class _SentenceListScreenState extends State<SentenceListScreen> {
         future: sentences,
         builder: (context, snapshot) {
 
-          if (snapshot.connectionState == ConnectionState.none) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
             if (!snapshot.hasData) return ErrorScreen(errorType.noData);
-            return ErrorScreen(errorType.noConnection);
+              return ErrorScreen(errorType.noConnection);
+            case ConnectionState.active:
+            case ConnectionState.waiting:
+              return Center(child: CircularProgressIndicator());
+            case ConnectionState.done:
+              if (snapshot.hasError) return ErrorScreen(errorType.exception);
+
+              return _buildListWidget(snapshot.data);
           }
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasError) {
-              return ErrorScreen(errorType.exception);
-            }
-            if (!snapshot.hasData) return ErrorScreen(errorType.noData);
-            return _buildListWidget(snapshot.data);
-          } else {
-            return Center(
-              child: CircularProgressIndicator()
-            );
-          }
+          return null;
         });
   }
 
@@ -61,7 +61,12 @@ class _SentenceListScreenState extends State<SentenceListScreen> {
         itemCount: data.length,
         itemBuilder: (context, index) {
           Sentence item = data[index];
-          return SentenceItem(phrase: item, index: index+1);
+          //return SentenceItem(phrase: item, index: index+1);
+          return ListTile(
+                title: Text(item.text),
+                subtitle: Text(item.language.code),
+                trailing: Icon(Icons.translate),
+              );
         });
   }
 
@@ -70,17 +75,32 @@ class _SentenceListScreenState extends State<SentenceListScreen> {
     super.initState();
 
     _getLanguagesFromPreferences().then((sourceLanguage){
-      sentences = fetchSentences("language=$sourceLanguage");
+      setState(() {
+        sentences = fetchSentences("language=$sourceLanguage");
+      });
     });
 
   }
 
   @override
   Widget build(BuildContext context) {
+
     final appBar = AppBar(
         centerTitle: true,
         elevation: 0.0,
         title: Text("Sentences"),
+        actions: [
+          FlatButton.icon(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute<void>(builder: (BuildContext context) {
+                      return TranslationScreen();
+                    }));
+              },
+              icon: Icon(Icons.translate, color: Colors.white),
+              label: Text("")),
+
+        ]
         );
 
     return Scaffold(

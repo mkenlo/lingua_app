@@ -8,15 +8,22 @@ import '../models/translation_model.dart';
 
 const url = '$apiAuthorityUrl/translations';
 
-void fetchTranslation() async {
-  // TODO : Implement GET request to fetch translations objects.
+Future<dynamic> fetchTranslation(String userId) async {
+  final response = await http.get('$apiAuthorityUrl/users/$userId/translations');
+
+  if (response.statusCode == 200) {
+    final jsonResponse = json.decode(response.body);
+    return Translation.asListFromJson(jsonResponse["results"]);
+  } else {
+    throw Exception('Failed to load Data');
+  }
 }
 
 Future<int> saveTranslation(Translation translation, String fileContent) async {
   final response = await http.post(url,
       body: json.encode({
         "author": translation.author,
-        "sentence": translation.sentenceId,
+        "sentence": translation.sentence,
         "target_lang": translation.targetLanguage,
         "audiofile": {"name": translation.audioFileName, "content": fileContent}
       }));

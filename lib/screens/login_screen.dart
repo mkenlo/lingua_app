@@ -1,14 +1,15 @@
 import 'dart:async';
-import 'package:Lingua/screens/preferences_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'translation_screen.dart';
 import '../services/fb_login.dart';
 import '../l10n/strings.dart';
 import '../models/user_model.dart';
+import 'home_screen.dart';
+import 'preferences_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -49,14 +50,15 @@ class _LoginScreenState extends State<LoginScreen> {
     User userProfile = await loadUserProfile(accessToken);
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    if(!prefs.containsKey('username')){
+    if(!prefs.containsKey('username')){ // first install
       await prefs.setString('username', userProfile.username);
       await prefs.setString('firstName', userProfile.firstName);
       await prefs.setString('lastName', userProfile.lastName);
       await prefs.setString('location', userProfile.location);
       await prefs.setString('avatar', userProfile.avatar);
 
-      saveUserProfile(userProfile);
+      String userId = await saveUserProfile(userProfile);
+      await prefs.setString('userid', userId);
     }
   }
 
@@ -74,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_isLanguageSaved)
       nextPage = (BuildContext context) => PreferenceScreen();
     else
-      nextPage = (BuildContext context) => TranslationScreen();
+      nextPage = (BuildContext context) => HomeScreen();
 
     if (Navigator.canPop(context)) {
       Navigator.pop(context);

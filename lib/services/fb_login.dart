@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:convert" show json;
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/user_model.dart';
@@ -16,12 +17,19 @@ Future<User> loadUserProfile(dynamic accessToken) async {
   return User.fromJson(jsonProfile);
 }
 
-Future<int> saveUserProfile(User user) async {
-  final response = await http.post(url, body: json.encode(user));
-
+Future<String> saveUserProfile(User user) async {
+  final response = await http.post(url, body: json.encode(
+    {
+      "username" : user.username,
+      "fullname" : user.fullName(),
+      "location": user.location,
+      "avatar": user.avatar
+    }
+  ));
+  final jsonResponse= json.decode(response.body);
   if (response.statusCode != 200) {
-    final error = json.decode(response.body);
-    throw Exception(error["message"]);
-  } else
-    return response.statusCode;
+    throw Exception(jsonResponse["message"]);
+  } else{
+    return jsonResponse['result']['id'];
+  }
 }

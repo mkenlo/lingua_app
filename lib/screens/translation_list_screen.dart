@@ -14,18 +14,17 @@ class TranslationListScreen extends StatefulWidget {
 }
 
 class _TranslationListScreenState extends State<TranslationListScreen> {
-
   String userId;
-
 
   @override
   void initState() {
     super.initState();
 
-    _getProfileInfo().then((userId){
+    _getProfileInfo().then((userId) {
       setState(() {
         this.userId = userId;
-      });});
+      });
+    });
   }
 
   Future<String> _getProfileInfo() async {
@@ -35,7 +34,6 @@ class _TranslationListScreenState extends State<TranslationListScreen> {
   }
 
   Widget _buildListWidget(data) {
-
     return ListView.builder(
         itemCount: data.length,
         itemBuilder: (context, index) {
@@ -48,32 +46,26 @@ class _TranslationListScreenState extends State<TranslationListScreen> {
         });
   }
 
-  Widget _noDataWidget(){
+  Widget _noDataWidget() {
     return Container(
         color: Color(0xFFF3F8F7),
         padding: EdgeInsets.all(16.0),
         child:
-        Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                  child: Icon(Icons.data_usage,
-                      size: 128.0, color: Theme.of(context).accentColor)),
-              Expanded(
-                  child: Column(
-                    children: <Widget>[
-                      Text(
-                        "You haven't recorded anything yet",
-                        style: TextStyle(color: Theme
-                            .of(context)
-                            .hintColor),
-                        textAlign: TextAlign.center,
-                      ),
-
-                    ],
-                  ))
-            ]));
-
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Expanded(
+              child: Icon(Icons.data_usage,
+                  size: 128.0, color: Theme.of(context).accentColor)),
+          Expanded(
+              child: Column(
+            children: <Widget>[
+              Text(
+                "You haven't recorded anything yet",
+                style: TextStyle(color: Theme.of(context).hintColor),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ))
+        ]));
   }
 
   @override
@@ -82,8 +74,7 @@ class _TranslationListScreenState extends State<TranslationListScreen> {
 
     final content = FutureBuilder(
       future: fetchTranslation(userId),
-      builder: (context, snapshot){
-
+      builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
             if (!snapshot.hasData) return ErrorScreen(errorType.noData);
@@ -93,17 +84,15 @@ class _TranslationListScreenState extends State<TranslationListScreen> {
             return Center(child: CircularProgressIndicator());
           case ConnectionState.done:
             if (snapshot.hasError) return ErrorScreen(errorType.exception);
-            if(snapshot.data.length >0 ) return _buildListWidget(snapshot.data);
+            if (snapshot.data.length > 0)
+              return _buildListWidget(snapshot.data);
 
             return _noDataWidget();
-
         }
         return null;
       },
     );
 
-    return Center(
-      child: content
-    );
+    return Center(child: content);
   }
 }

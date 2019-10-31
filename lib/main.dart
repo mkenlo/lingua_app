@@ -14,24 +14,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Lingua',
-      theme: ThemeData(
-        fontFamily: "Raleway",
-        primarySwatch: Colors.teal
-      ),
+      theme: ThemeData(fontFamily: "Raleway", primarySwatch: Colors.teal),
       home: Router(),
     );
   }
-
 }
 
-class Router extends StatefulWidget{
-
+class Router extends StatefulWidget {
   @override
   State createState() => _RouterState();
 }
 
-class _RouterState extends State<Router>{
-
+class _RouterState extends State<Router> {
   FacebookLogin facebookSignIn;
   bool isFBTokenValid;
   bool isPrefSaved;
@@ -41,25 +35,25 @@ class _RouterState extends State<Router>{
     super.initState();
     facebookSignIn = new FacebookLogin();
 
-    facebookSignIn.isLoggedIn.then((res){
+    facebookSignIn.isLoggedIn.then((res) {
       setState(() {
         isFBTokenValid = res;
       });
     });
 
-    SharedPreferences.getInstance().then((prefInstance){
-      if(prefInstance.containsKey("sourceLanguage") || prefInstance.containsKey("targetLanguage")){
+    SharedPreferences.getInstance().then((prefInstance) {
+      if (prefInstance.containsKey("sourceLanguage") ||
+          prefInstance.containsKey("targetLanguage")) {
         setState(() {
           isPrefSaved = true;
         });
       }
     });
-
   }
 
   @override
   Widget build(BuildContext context) {
-    if(isFBTokenValid == null || isPrefSaved==null){
+    if (isFBTokenValid == null || isPrefSaved == null) {
       return LoginScreen();
     }
     return HomeScreen();

@@ -44,8 +44,10 @@ class ProfileScreenState extends State<ProfileScreen> {
 
   Future<List> _getPreferredLanguage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return [prefs.getString("sourceLanguage"),
-    prefs.getString("targetLanguage")];
+    return [
+      prefs.getString("sourceLanguage"),
+      prefs.getString("targetLanguage")
+    ];
   }
 
   void _setPreferredSourceLang(String preferredLang) async {
@@ -167,7 +169,7 @@ class ProfileScreenState extends State<ProfileScreen> {
         ));
 
     final Widget name = ListTile(
-        title: Text("${profile.fullName()} ",
+        title: Text("${profile.fullName()}",
             style: Theme.of(context).textTheme.headline),
         subtitle: Text(profile.username));
 
@@ -205,8 +207,14 @@ class ProfileScreenState extends State<ProfileScreen> {
     );
 
     return Container(
-        child: ListView(
-            children: [profilePic, name, location, sourceLang, targetLang, loginStatus]));
+        child: ListView(children: [
+      profilePic,
+      name,
+      location,
+      sourceLang,
+      targetLang,
+      loginStatus
+    ]));
   }
 
   @override

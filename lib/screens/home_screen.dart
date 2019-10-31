@@ -1,10 +1,8 @@
-
 import 'package:flutter/material.dart';
 
 import 'translation_screen.dart';
 import 'translation_list_screen.dart';
 import 'profile_screen.dart';
-
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key key}) : super(key: key);
@@ -23,8 +21,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Widget getPage(int index){
-    switch(index){
+  Widget getPage(int index) {
+    switch (index) {
       case 0:
         return TranslationScreen();
       case 1:
@@ -34,10 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     final bottom = BottomNavigationBar(
       selectedItemColor: Theme.of(context).accentColor,
       currentIndex: _selectedIndex,
@@ -58,14 +54,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
 
-
     return Scaffold(
-
         appBar: AppBar(
           title: Text(_pagesTitle[_selectedIndex]),
         ),
         body: getPage(_selectedIndex),
-        bottomNavigationBar: bottom
-    );
+        bottomNavigationBar: bottom);
   }
 }

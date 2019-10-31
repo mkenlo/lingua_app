@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/language_service.dart';
 import '../models/language_model.dart';
 import 'error_screen.dart';
-import 'sentence_list_screen.dart';
 import 'home_screen.dart';
 
 class PreferenceScreen extends StatefulWidget {
@@ -130,8 +130,8 @@ class PreferenceScreenState extends State<PreferenceScreen> {
         ),
         child: FlatButton(
             onPressed: () {
-              _setLanguagesPreferences().then((isLanguageSaved){
-                if(isLanguageSaved) _navigateToRecordingPage();
+              _setLanguagesPreferences().then((isLanguageSaved) {
+                if (isLanguageSaved) _navigateToRecordingPage();
               });
             },
             child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [

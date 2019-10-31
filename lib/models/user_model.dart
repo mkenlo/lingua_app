@@ -3,7 +3,7 @@ class User {
   String username;
   String firstName;
   String lastName;
-  String location="";
+  String location = "";
   String avatar;
 
   User(
@@ -33,6 +33,4 @@ class User {
         'location': location,
         'avatar': avatar
       };
-
-
 }

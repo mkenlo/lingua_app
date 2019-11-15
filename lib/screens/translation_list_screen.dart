@@ -78,7 +78,6 @@ class _TranslationListScreenState extends State<TranslationListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(userId);
 
     final content = FutureBuilder(
       future: fetchTranslation(userId),

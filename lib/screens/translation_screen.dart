@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:async/async.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:flutter_sound/flutter_sound.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flushbar/flushbar.dart';
 
@@ -15,6 +16,7 @@ import '../config.dart';
 import '../services/translation_service.dart';
 import '../services/sentence_service.dart';
 import 'error_screen.dart';
+import '../services/permission_service.dart';
 
 class TranslationScreen extends StatefulWidget {
   @override
@@ -47,6 +49,9 @@ class TranslationScreenState extends State<TranslationScreen> {
 
   final AsyncMemoizer _caching = AsyncMemoizer();
 
+  PermissionService _permissionService;
+  bool _hasPermissions = false;
+
   _fetchAndCacheData() {
     // TODO  Deal with the issue that it will make it impossible to load more data from the server if pagination
     return _caching.runOnce(() async {
@@ -68,30 +73,27 @@ class TranslationScreenState extends State<TranslationScreen> {
     if (_currentSentence == null) {
       _currentSentence = _sentences.first;
     }
-    String fileId = _currentSentence.id;
-    new File("$recordStorage/$fileId.$fileExtension").create().then((filePath) {
-      _flutterSound.startRecorder(filePath.path).then((path) {
-        setState(() {
-          this._isRecording = true;
-        });
-
-        _recorderSubscription =
-            _flutterSound.onRecorderStateChanged.listen((e) {
-          if (e == null) {
-            return;
-          }
-          DateTime date = new DateTime.fromMillisecondsSinceEpoch(
-              e.currentPosition.toInt());
-          String txt = DateFormat('mm:ss:SS', 'en_US').format(date);
-
-          setState(() {
-            this._recorderTimer = txt.substring(0, 8);
-          });
-        });
-      }).catchError((error) {
-        print(error);
+    String filePath = "$appDirectory/${_currentSentence.id}.$fileExtension";
+    _flutterSound.startRecorder(filePath).then((path) {
+      setState(() {
+        this._isRecording = true;
       });
-    }); //File
+      print(path);
+      _recorderSubscription = _flutterSound.onRecorderStateChanged.listen((e) {
+        if (e == null) {
+          return;
+        }
+        DateTime date =
+            new DateTime.fromMillisecondsSinceEpoch(e.currentPosition.toInt());
+        String txt = DateFormat('mm:ss:SS', 'en_US').format(date);
+
+        setState(() {
+          this._recorderTimer = txt.substring(0, 8);
+        });
+      });
+    }).catchError((error) {
+      print(error);
+    }); // startRecorder
   }
 
   void _stopRecording() {
@@ -215,9 +217,21 @@ class TranslationScreenState extends State<TranslationScreen> {
       lightColor = _isRecordingColor["primaryLight"];
     }
 
+    _permissionService
+        .hasPermission(PermissionGroup.microphone)
+        .then((granted) {
+      setState(() {
+        this._hasPermissions = granted;
+      });
+    });
+
     Widget recorder = GestureDetector(
         onTap: () {
-          (_isRecording) ? _stopRecording() : _startRecording();
+          if (!_hasPermissions) {
+            _permissionService.requestAppPermission();
+          } else {
+            (_isRecording) ? _stopRecording() : _startRecording();
+          }
         },
         child: Container(
             child: _isRecording ? stopIcon : micIcon,
@@ -325,17 +339,21 @@ class TranslationScreenState extends State<TranslationScreen> {
     _pageController = PageController();
 
     // Create App Recording Folder
-    new Directory(recordStorage).create();
+    if (_hasPermissions) {
+      new Directory(recordStorage).create();
+    }
 
     _getUserPreferences().then((prefs) {
       setState(() {
-        setState(() {
-          this._author = prefs[0];
-          this._sourceLanguage = prefs[1];
-          this._targetLang = prefs[2];
-        });
+        this._author = prefs[0];
+        this._sourceLanguage = prefs[1];
+        this._targetLang = prefs[2];
       });
     });
+
+    _permissionService = new PermissionService();
+
+
   }
 
   @override

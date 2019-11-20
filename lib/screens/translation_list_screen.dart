@@ -42,7 +42,7 @@ class _TranslationListScreenState extends State<TranslationListScreen> {
           Translation item = data[index];
           return ListTile(
             title: Text(item.sentence),
-            subtitle: Text("Oct 20, 2019"),
+            subtitle: Text(item.recordedOn),
             trailing: Icon(Icons.play_circle_outline),
           );
         });

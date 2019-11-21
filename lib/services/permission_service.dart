@@ -23,8 +23,7 @@ class PermissionService {
     var result = await _permissionHandler.requestPermissions(permissions);
     bool granted = true;
     result.forEach((permission, permissionStatus) {
-      if (permissionStatus != PermissionStatus.granted)
-        granted = granted && false;
+      granted = granted && permissionStatus == PermissionStatus.granted;
     });
     if(granted){ // create app Directory files
       new Directory(recordStorage).createSync();

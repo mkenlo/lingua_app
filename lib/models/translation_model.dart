@@ -22,7 +22,7 @@ class Translation {
         targetLanguage: json['language']['to'],
         sentence: json['sentence'],
         audioFileName: json['audiofile'],
-        recordedOn: json['recordedOn']);
+        recordedOn: json['recordeddate']);
   }
 
   static List<Translation> asListFromJson(List<dynamic> json) {

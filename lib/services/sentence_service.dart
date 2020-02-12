@@ -3,7 +3,7 @@ import "dart:convert" show json;
 import 'package:http/http.dart' as http;
 
 import '../models/sentence_model.dart';
-import 'settings.dart';
+import '../config.dart';
 
 
 const url = '$apiAuthorityUrl/sentences';

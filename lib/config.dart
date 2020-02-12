@@ -1,4 +1,4 @@
-const String apiAuthorityUrl = "http://192.168.0.22:8000";
+const String apiAuthorityUrl = "http://api.brainspark.me";
 
 const String recordStorage = "/sdcard/Lingua";
 

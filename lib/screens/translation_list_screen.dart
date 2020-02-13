@@ -14,15 +14,15 @@ class TranslationListScreen extends StatefulWidget {
 }
 
 class _TranslationListScreenState extends State<TranslationListScreen> {
-  String userId;
+  String username;
 
   @override
   void initState() {
     super.initState();
 
-    _getProfileInfo().then((userId) {
+    _getProfileInfo().then((username) {
       setState(() {
-        this.userId = userId;
+        this.username = username;
       });
     });
   }
@@ -30,7 +30,7 @@ class _TranslationListScreenState extends State<TranslationListScreen> {
   Future<String> _getProfileInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    return prefs.getString('userid');
+    return prefs.getString('username');
   }
 
   Widget _buildListWidget(data) {
@@ -72,7 +72,7 @@ class _TranslationListScreenState extends State<TranslationListScreen> {
   Widget build(BuildContext context) {
 
     final content = FutureBuilder(
-      future: fetchTranslation(userId),
+      future: fetchTranslation(username),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
